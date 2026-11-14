@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Linux System Care Check – background checks
+Comment=Checks the system every few hours and shows notifications with buttons; changes nothing by itself unless you allow it in Settings
+Exec=linux-system-care-check --background
+TryExec=linux-system-care-check
+Icon=io.github.jgu.LinuxSystemCareCheck
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=45

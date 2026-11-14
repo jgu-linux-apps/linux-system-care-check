@@ -1,0 +1,364 @@
+#!/usr/bin/python3
+"""Linux System Care Check — root helper (run through pkexec, polkit action
+io.github.jgu.LinuxSystemCareCheck.helper).
+
+Only named operations, never shell strings or paths from the UI. Every argument is checked against what
+this helper reads from the system itself (installed packages, disabled snap revisions, the running kernel),
+and every change uses the tool's own command (apt-get, snap, flatpak, journalctl, fwupdmgr)."""
+import os
+import re
+import subprocess
+import sys
+
+for cand in ("/usr/share/linux-system-care-check/src",
+             os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src")):
+    if os.path.isdir(os.path.join(cand, "lscc")):
+        sys.path.insert(0, os.path.abspath(cand))
+        break
+from lscc import safety  # noqa: E402
+
+ENV = dict(os.environ, LC_ALL="C", LANG="C", DEBIAN_FRONTEND="noninteractive",
+           PATH="/usr/sbin:/usr/bin:/sbin:/bin")
+
+
+def die(msg, code=2):
+    print("ERROR: " + msg, file=sys.stderr)
+    sys.exit(code)
+
+
+def run(args, check=True):
+    print("$ " + " ".join(args), flush=True)
+    p = subprocess.run(args, env=ENV, text=True)
+    if check and p.returncode != 0:
+        die(f"{args[0]} failed ({p.returncode})", p.returncode or 1)
+    return p.returncode
+
+
+def out(args):
+    return subprocess.run(args, env=ENV, text=True, capture_output=True).stdout
+
+
+def installed_pkgs(names):
+    st = out(["dpkg-query", "-W", "-f=${Package} ${Status}\n", *names])
+    return {line.split()[0] for line in st.splitlines() if line.endswith("install ok installed")}
+
+
+# ------------------------------------------------------------------ operations
+def op_apt_refresh(_a):
+    run(["apt-get", "update"])
+
+
+def op_apt_upgrade(args):
+    if not args:
+        # "upgrade --with-new-pkgs" never removes packages (unlike full-upgrade)
+        run(["apt-get", "-y", "-o", "Dpkg::Options::=--force-confold", "--with-new-pkgs", "upgrade"])
+        return
+    # chosen packages only: upgrade what is installed, never install new or remove anything
+    for p in args:
+        if not safety.valid_pkg(p):
+            die(f"bad package name: {p}")
+    sim = out(["apt-get", "-s", "install", "--only-upgrade", *args])
+    removed = safety.parse_apt_sim_removed(sim)
+    if removed:
+        die("apt would remove packages: " + ", ".join(removed))
+    run(["apt-get", "-y", "-o", "Dpkg::Options::=--force-confold", "install", "--only-upgrade", *args])
+
+
+def op_snap_refresh(args):
+    for n in args:
+        if not safety.valid_snap(n):
+            die(f"bad snap name: {n}")
+    run(["snap", "refresh", *args])
+
+
+def op_flatpak_update(args):
+    for a in args:
+        if not safety.valid_flatpak(a):
+            die(f"bad flatpak id: {a}")
+    run(["flatpak", "update", "-y", "--noninteractive", "--system", *args])
+
+
+def op_fwupd_update(args):
+    import re
+    for a in args:
+        if not re.fullmatch(r"[0-9a-f]{40}", a):
+            die(f"bad device id: {a}")
+    run(["fwupdmgr", "update", "--assume-yes", "--no-reboot-check", *args])
+
+
+def op_clean_apt_cache(_a):
+    run(["apt-get", "clean"])
+
+
+def op_vacuum_journal(args):
+    weeks = args[0] if args else "2"
+    if not weeks.isdigit() or not 1 <= int(weeks) <= 52:
+        die("weeks must be 1-52")
+    run(["journalctl", f"--vacuum-time={int(weeks)}weeks"])
+
+
+def _user_documents():
+    """The calling user's Documents folder (XDG user-dirs), owned by that user."""
+    import pwd
+    uid = int(os.environ.get("PKEXEC_UID", "-1"))
+    if uid < 1000:
+        die("unknown calling user")
+    pw = pwd.getpwuid(uid)
+    docs = os.path.join(pw.pw_dir, "Documents")
+    try:
+        with open(os.path.join(pw.pw_dir, ".config/user-dirs.dirs"), encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("XDG_DOCUMENTS_DIR="):
+                    docs = line.split("=", 1)[1].strip().strip('"').replace("$HOME", pw.pw_dir)
+    except OSError:
+        pass
+    if not os.path.realpath(docs).startswith(os.path.realpath(pw.pw_dir) + os.sep):
+        docs = os.path.join(pw.pw_dir, "Documents")
+    return pw, docs
+
+
+def op_archive_journal(args):
+    """Save the logs older than N days as a compressed text file in the user's Documents, then remove them
+    from the journal."""
+    import subprocess
+    import time
+    if len(args) != 1 or not args[0].isdigit() or not 1 <= int(args[0]) <= 365:
+        die("days must be 1-365")
+    days = int(args[0])
+    pw, docs = _user_documents()
+    dest_dir = os.path.join(docs, "System logs archive")
+    os.makedirs(dest_dir, exist_ok=True)
+    os.chown(dest_dir, pw.pw_uid, pw.pw_gid)
+    dest = os.path.join(dest_dir, f"journal-until-{time.strftime('%Y-%m-%d', time.localtime(time.time() - days * 86400))}.txt.xz")
+    with open(dest + ".part", "wb") as f:
+        j = subprocess.Popen(["journalctl", f"--until=-{days}d", "-o", "short-iso", "--no-pager"], stdout=subprocess.PIPE,
+                             env=ENV)
+        x = subprocess.run(["xz", "-T0", "-6"], stdin=j.stdout, stdout=f)
+        j.stdout.close()
+        if j.wait() not in (0, 1) or x.returncode != 0:
+            os.remove(dest + ".part")
+            die("archiving failed")
+    os.replace(dest + ".part", dest)
+    os.chown(dest, pw.pw_uid, pw.pw_gid)
+    print(f"archive: {dest} ({os.path.getsize(dest)} bytes)", flush=True)
+    run(["journalctl", f"--vacuum-time={days}d"])
+
+
+def op_flatpak_unused(_a):
+    run(["flatpak", "uninstall", "--unused", "-y", "--noninteractive", "--system"])
+
+
+def op_remove_snap_revisions(args):
+    listing = out(["snap", "list", "--all"])
+    disabled = set()
+    for line in listing.splitlines()[1:]:
+        p = line.split()
+        if len(p) >= 6 and "disabled" in p[-1]:
+            disabled.add((p[0], p[2]))
+    for a in args:
+        name, _, rev = a.partition("=")
+        if not (safety.valid_snap(name) and safety.valid_rev(rev)):
+            die(f"invalid snap revision {a!r}")
+        if (name, rev) not in disabled:
+            die(f"{name} revision {rev} is not a disabled revision")
+    for a in args:
+        name, _, rev = a.partition("=")
+        run(["snap", "remove", name, f"--revision={rev}"])
+
+
+def op_remove_kernels(args):
+    st = out(["dpkg-query", "-W", "-f=${Package} ${Status}\n", "linux-image-[0-9]*"])
+    inst = [re.sub(r"^linux-image-(unsigned-)?", "", line.split()[0]) for line in st.splitlines()
+            if line.endswith("install ok installed")]
+    allowed = set(safety.removable_kernels(inst, os.uname().release))
+    for v in args:
+        if not safety.KVER_RE.match(v) or v not in allowed:
+            die(f"kernel {v!r} may not be removed (running, fallback or not installed)")
+    pkgs = []
+    for v in args:
+        pkgs += [f"linux-image-{v}", f"linux-image-unsigned-{v}", f"linux-modules-{v}",
+                 f"linux-modules-extra-{v}", f"linux-headers-{v}"]
+    pkgs = sorted(installed_pkgs(pkgs))
+    sim = safety.parse_apt_sim_removed(out(["apt-get", "-s", "remove", *pkgs]))
+    for p in sim:
+        if not any(p.endswith(v) or p.endswith(v + "-generic") for v in args) or safety.is_protected_pkg(p):
+            die(f"removing the kernels would also remove {p}; stopped")
+    run(["apt-get", "-y", "remove", *pkgs])
+
+
+def op_apt_remove(args):
+    confirm = None
+    names = []
+    for a in args:
+        if a.startswith("--confirm="):
+            confirm = set(filter(None, a.split("=", 1)[1].split(",")))
+        else:
+            names.append(a)
+    if not names:
+        die("nothing to remove")
+    for n in names:
+        if not safety.valid_pkg(n):
+            die(f"invalid package name {n!r}")
+        if safety.is_protected_pkg(n):
+            die(f"{n} is protected and cannot be removed")
+    missing = set(names) - installed_pkgs(names)
+    if missing:
+        die("not installed: " + ", ".join(sorted(missing)))
+    sim = safety.parse_apt_sim_removed(out(["apt-get", "-s", "remove", *names]))
+    ok, reason, extra = safety.check_apt_simulation(names, sim)
+    if not ok:
+        die("would remove protected packages: " + ", ".join(extra))
+    if extra and (confirm is None or set(sim) != confirm):
+        die("would also remove: " + ", ".join(extra) + " (confirm the full list first)", 3)
+    run(["apt-get", "-y", "remove", *names])          # remove, never purge: configuration stays
+
+
+def op_snap_remove(args):
+    known = {line.split()[0] for line in out(["snap", "list"]).splitlines()[1:] if line.split()}
+    for n in args:
+        if not safety.valid_snap(n) or n not in known:
+            die(f"snap {n!r} is not installed")
+        if n in safety.PROTECTED_SNAPS:
+            die(f"{n} is protected and cannot be removed")
+    for n in args:
+        run(["snap", "remove", n])
+
+
+def op_flatpak_remove(args):
+    known = set(out(["flatpak", "list", "--system", "--app", "--columns=application"]).split())
+    for n in args:
+        if not safety.valid_flatpak(n) or n not in known:
+            die(f"flatpak {n!r} is not installed system-wide")
+    run(["flatpak", "uninstall", "-y", "--noninteractive", "--system", *args])
+
+
+def op_install_timevault(args):
+    if len(args) != 1:
+        die("one .deb expected")
+    path = os.path.realpath(args[0])
+    uid = int(os.environ.get("PKEXEC_UID", "-1"))
+    import pwd
+    try:
+        home = pwd.getpwuid(uid).pw_dir
+    except KeyError:
+        die("unknown caller")
+    cache = os.path.join(home, ".cache", "linux-system-care-check") + os.sep
+    if not path.startswith(cache) or not re.match(r"^timevault_[0-9][0-9A-Za-z.+~\-]*_all\.deb$", os.path.basename(path)):
+        die("unexpected package location")
+    if out(["dpkg-deb", "-f", path, "Package"]).strip() != "timevault":
+        die("the package is not TimeVault")
+    run(["apt-get", "install", "-y", path])
+
+
+# ------------------------------------------------------------------ battery charge limit
+BATTERY_CONF = "/etc/linux-system-care-check/battery.conf"
+
+
+def _battery_targets():
+    """Writable charge-control files the kernel offers — found by glob only, never a path from the caller."""
+    import glob
+    t = {}
+    for b in sorted(glob.glob("/sys/class/power_supply/BAT*")):
+        if os.path.exists(b + "/charge_control_end_threshold"):
+            t.setdefault("threshold", b + "/charge_control_end_threshold")
+        if os.path.exists(b + "/charge_types"):
+            t.setdefault("types", b + "/charge_types")
+    cons = sorted(glob.glob("/sys/bus/platform/drivers/ideapad_acpi/*/conservation_mode"))
+    if cons:
+        t["conservation"] = cons[0]
+    return t
+
+
+def _battery_write(kind, value):
+    t = _battery_targets()
+    if kind not in t:
+        die(f"this laptop has no {kind} battery control")
+    if kind == "threshold":
+        if not value.isdigit() or not 50 <= int(value) <= 100:
+            die("threshold must be 50-100")
+    elif kind == "types":
+        with open(t["types"]) as f:
+            opts = f.read().replace("[", "").replace("]", "").split()
+        if value not in opts or value not in ("Standard", "Long_Life", "Adaptive", "Fast"):
+            die("charge type not offered by this battery")
+    elif kind == "conservation":
+        if value not in ("0", "1"):
+            die("conservation must be 0 or 1")
+    with open(t[kind], "w") as f:
+        f.write(value)
+    print(f"{t[kind]} = {value}", flush=True)
+
+
+def op_battery_set(args):
+    if len(args) != 2:
+        die("battery-set <threshold|types|conservation> <value>")
+    _battery_write(args[0], args[1])
+    os.makedirs(os.path.dirname(BATTERY_CONF), exist_ok=True)
+    with open(BATTERY_CONF, "w") as f:
+        f.write(f"{args[0]}={args[1]}\n")
+
+
+def op_battery_apply(_a):
+    """At boot (linux-system-care-check-battery.service): re-apply the saved limit (some laptops forget it)."""
+    try:
+        with open(BATTERY_CONF) as f:
+            kind, value = f.read().strip().split("=", 1)
+    except (OSError, ValueError):
+        return
+    if kind in _battery_targets():
+        _battery_write(kind, value)
+
+
+def op_battery_reset(_a):
+    """Back to full charging and forget the saved limit."""
+    t = _battery_targets()
+    if "threshold" in t:
+        _battery_write("threshold", "100")
+    if "types" in t:
+        _battery_write("types", "Standard")
+    if "conservation" in t:
+        _battery_write("conservation", "0")
+    if os.path.exists(BATTERY_CONF):
+        os.remove(BATTERY_CONF)
+
+
+# ------------------------------------------------------------------ Ubuntu automatic security updates
+AUTO_UPGRADES = "/etc/apt/apt.conf.d/20auto-upgrades"
+
+
+def op_unattended(args):
+    """Switch Ubuntu's own unattended-upgrades on/off (the same file as Software & Updates writes)."""
+    if args not in (["on"], ["off"]):
+        die("unattended on|off")
+    if args == ["on"] and not installed_pkgs(["unattended-upgrades"]):
+        run(["apt-get", "install", "-y", "unattended-upgrades"])
+    v = "1" if args == ["on"] else "0"
+    with open(AUTO_UPGRADES + ".tmp", "w") as f:
+        f.write(f'APT::Periodic::Update-Package-Lists "1";\nAPT::Periodic::Unattended-Upgrade "{v}";\n')
+    os.replace(AUTO_UPGRADES + ".tmp", AUTO_UPGRADES)
+    print(f"{AUTO_UPGRADES}: Unattended-Upgrade {v}", flush=True)
+
+
+OPS = {
+    "apt-refresh": op_apt_refresh, "apt-upgrade": op_apt_upgrade, "snap-refresh": op_snap_refresh,
+    "flatpak-update": op_flatpak_update, "fwupd-update": op_fwupd_update,
+    "clean-apt-cache": op_clean_apt_cache, "vacuum-journal": op_vacuum_journal,
+    "flatpak-unused": op_flatpak_unused, "archive-journal": op_archive_journal, "remove-snap-revisions": op_remove_snap_revisions,
+    "remove-kernels": op_remove_kernels, "apt-remove": op_apt_remove, "snap-remove": op_snap_remove,
+    "flatpak-remove": op_flatpak_remove, "install-timevault": op_install_timevault,
+    "battery-set": op_battery_set, "battery-apply": op_battery_apply, "battery-reset": op_battery_reset,
+    "unattended": op_unattended,
+}
+
+
+def main(argv):
+    if os.geteuid() != 0:
+        die("must run as root (through pkexec)")
+    if len(argv) < 2 or argv[1] not in OPS:
+        die("unknown operation; known: " + ", ".join(sorted(OPS)))
+    OPS[argv[1]](argv[2:])
+    print("OK", flush=True)
+
+
+if __name__ == "__main__":
+    main(sys.argv)

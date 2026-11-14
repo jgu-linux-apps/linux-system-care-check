@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+  <vendor>JGu Linux Apps</vendor>
+  <vendor_url>https://github.com/jgu-linux-apps/linux-system-care-check</vendor_url>
+  <action id="io.github.jgu.LinuxSystemCareCheck.helper">
+    <description>Make changes to the system (updates, cleanup, uninstalling programs)</description>
+    <description xml:lang="pl">Zmiany w systemie (aktualizacje, sprzątanie, odinstalowanie programów)</description>
+    <message>Linux System Care Check needs administrator rights to change the system</message>
+    <message xml:lang="pl">Linux System Care Check potrzebuje uprawnień administratora, aby zmienić system</message>
+    <icon_name>io.github.jgu.LinuxSystemCareCheck</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/lib/linux-system-care-check/care-helper</annotate>
+  </action>
+</policyconfig>

@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=Linux System Care Check
+GenericName=System care
+GenericName[pl]=Opieka nad systemem
+Comment=Updates, cleanup, programs and backups for Ubuntu in one place
+Comment[pl]=Aktualizacje, sprzątanie, programy i kopie zapasowe Ubuntu w jednym miejscu
+Exec=linux-system-care-check
+Icon=io.github.jgu.LinuxSystemCareCheck
+Terminal=false
+Categories=System;Settings;
+Keywords=update;cleanup;uninstall;webapp;disk;backup;timevault;aktualizacje;sprzątanie;
+StartupNotify=true
+StartupWMClass=io.github.jgu.LinuxSystemCareCheck
+SingleMainWindow=true

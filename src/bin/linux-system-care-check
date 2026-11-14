@@ -1,0 +1,46 @@
+#!/usr/bin/python3
+import os
+import sys
+
+HERE = os.path.dirname(os.path.realpath(__file__))
+for cand in (os.path.join(HERE, "..", "src"), "/usr/share/linux-system-care-check/src"):
+    if os.path.isdir(os.path.join(cand, "lscc")):
+        sys.path.insert(0, os.path.abspath(cand))
+        break
+
+
+
+def choose_renderer():
+    """Settings → Appearance → Renderer: "auto" keeps GTK's default; gl / vulkan / cairo force one
+    (troubleshooting). GSK_RENDERER set by the user always wins."""
+    if "GSK_RENDERER" in os.environ:
+        return
+    import json
+    cfg = os.path.join(os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config"),
+                       "linux-system-care-check", "settings.json")
+    try:
+        with open(cfg, encoding="utf-8") as f:
+            choice = json.load(f).get("renderer", "auto")
+    except (OSError, ValueError):
+        choice = "auto"
+    if choice in ("gl", "vulkan", "cairo"):
+        os.environ["GSK_RENDERER"] = choice
+
+
+if __name__ == "__main__":
+    if "--icon-sync-watch" in sys.argv:
+        from lscc import desktop
+        desktop.watch()
+    elif "--icon-sync" in sys.argv:
+        from lscc import desktop
+        print(desktop.apply_icon())
+    elif "--background" in sys.argv:
+        from lscc import background
+        sys.exit(background.main())
+    elif "--version" in sys.argv:
+        from lscc import VERSION
+        print(VERSION)
+    else:
+        choose_renderer()
+        from lscc.app import main
+        sys.exit(main())

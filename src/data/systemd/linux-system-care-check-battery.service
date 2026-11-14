@@ -1,0 +1,11 @@
+[Unit]
+Description=Linux System Care Check – re-apply the battery charge limit chosen in the app
+ConditionPathExists=/etc/linux-system-care-check/battery.conf
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/linux-system-care-check/care-helper battery-apply
+
+[Install]
+WantedBy=multi-user.target

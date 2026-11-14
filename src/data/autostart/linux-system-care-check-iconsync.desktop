@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Linux System Care Check – icon theme sync
+Comment=Switches the app icon between dark and light with the system theme, also while the app is closed
+Exec=linux-system-care-check --icon-sync-watch
+TryExec=linux-system-care-check
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=3
