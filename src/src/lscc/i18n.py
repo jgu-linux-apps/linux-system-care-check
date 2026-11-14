@@ -20,29 +20,7 @@ def _lang():
 
 LANG = _lang()
 
-EN = {
-    "Przegląd": "Overview", "Aktualizacje": "Updates", "Sprzątanie": "Cleanup", "Programy": "Programs",
-    "Historia i przywracanie": "History and restore", "Ustawienia": "Settings", "O programie": "About",
-    "Zakończ": "Quit", "Sprawdź ponownie": "Check again", "Sprawdź": "Check",
-    "Twój system jest w dobrej formie": "Your system is in good shape",
-    "Twój system potrzebuje uwagi": "Your system needs attention",
-    "forma systemu": "system health", "Co warto zrobić": "What to do", "Wszystko w porządku": "All good",
-    "Dysk": "Disk", "Bateria": "Battery", "Temperatury": "Temperatures", "Ostatnio": "Recently",
-    "aktualizacje bezpieczeństwa": "security updates", "Zainstaluj": "Install", "Pokaż": "Show",
-    "Podgląd": "Preview", "do odzyskania": "to free up", "Aktualizuj wszystko": "Update everything",
-    "Wyczyść zaznaczone": "Clean selected", "Odinstaluj zaznaczone": "Uninstall selected",
-    "Zaznaczone": "Selected", "Odznacz": "Deselect", "Anuluj": "Cancel", "Szukaj programu…": "Search for a program…",
-    "Wszystkie": "All", "Webappy": "Web apps", "Tryb podglądu": "Preview mode",
-    "Tryb podglądu: aplikacja pokazuje, co by zrobiła, ale niczego nie zmienia w systemie.":
-        "Preview mode: the app shows what it would do, but changes nothing in the system.",
-    "Wyłącz w Ustawieniach": "Turn off in Settings",
-    "Najpierw zrób kopię systemu w Linux Backup TimeVault": "First back up the system with Linux Backup TimeVault",
-    "Utwórz kopię teraz": "Back up now", "Otwórz TimeVault": "Open TimeVault", "Przywróć system…": "Restore system…",
-    "Pobierz i zainstaluj TimeVault": "Download and install TimeVault", "Strona projektu": "Project page",
-    "Motyw": "Theme", "Wygląd": "Appearance", "Bezpieczeństwo": "Safety", "Gotowe": "Done", "Błąd": "Error",
-    "Zamknij": "Close", "Szczegóły": "Details", "Wykonano": "Done", "Brak zmian": "No changes",
-    "System": "System", "Aurora": "Aurora", "Studio": "Studio", "Aubergine": "Aubergine",
-}
+from .i18n_en import EN  # noqa: E402
 
 
 def _(s):

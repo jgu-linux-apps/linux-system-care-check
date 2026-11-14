@@ -15,7 +15,7 @@ from ..sysrun import human, run  # noqa: E402
 from .common import Ring, card, chip, clear, confirm, in_background, label, page_box, scrolled, ProgressDialog  # noqa: E402
 
 SRC_LABEL = {"apt": "apt", "snap": "snap", "flatpak": "flatpak", "firmware": "firmware", "appimage": "AppImage",
-             "steam": "Steam", "webapp": "webapp", "other": "inne"}
+             "steam": "Steam", "webapp": "webapp", "other": _("inne")}
 
 
 def header(title, subtitle="", *buttons):

@@ -5,6 +5,7 @@ import os
 
 from gi.repository import Gio, GLib
 
+from .i18n import _
 from .sysrun import have, run
 
 REAL_FS = {"ext4", "ext3", "ext2", "btrfs", "xfs", "f2fs", "vfat", "exfat", "ntfs", "ntfs3", "fuseblk", "zfs"}
@@ -62,7 +63,7 @@ def parse_du(text, home):
 
 def biggest_folders(home=None, limit=10):
     home = home or os.path.expanduser("~")
-    rc, out, _ = run(["du", "-x", "-b", "-d1", home], timeout=180)
+    rc, out, _err = run(["du", "-x", "-b", "-d1", home], timeout=180)
     return parse_du(out, home)[:limit]
 
 
@@ -188,8 +189,8 @@ def power_profile():
     """(current, [available]) from power-profiles-daemon, or (None, [])."""
     if not have("powerprofilesctl"):
         return None, []
-    rc, cur, _ = run(["powerprofilesctl", "get"], timeout=5)
-    rc2, lst, _ = run(["powerprofilesctl", "list"], timeout=5)
+    rc, cur, _err = run(["powerprofilesctl", "get"], timeout=5)
+    rc2, lst, _err = run(["powerprofilesctl", "list"], timeout=5)
     avail = [ln.strip().lstrip("* ").rstrip(":") for ln in lst.splitlines() if ln.strip().rstrip(":") and
              ln.rstrip().endswith(":")]
     return (cur.strip() or None), avail
@@ -222,7 +223,7 @@ def sensors(root="/sys/class/hwmon"):
             v = _rd(hw, os.path.basename(t), int)
             if v is None or not (-40000 < v < 150000):
                 continue
-            lbl = _rd(hw, os.path.basename(base) + "_label") or os.path.basename(base).replace("temp", "czujnik ")
+            lbl = _rd(hw, os.path.basename(base) + "_label") or os.path.basename(base).replace("temp", _("czujnik") + " ")
             hi = _rd(hw, os.path.basename(base) + "_max", int)
             cr = _rd(hw, os.path.basename(base) + "_crit", int)
             temps.append((lbl, v / 1000, hi / 1000 if hi and 0 < hi < 150000 else None,
@@ -231,7 +232,7 @@ def sensors(root="/sys/class/hwmon"):
             v = _rd(hw, os.path.basename(fp), int)
             if v is None:
                 continue
-            lbl = _rd(hw, os.path.basename(fp)[:-len("_input")] + "_label") or os.path.basename(fp)[:-len("_input")].replace("fan", "wentylator ")
+            lbl = _rd(hw, os.path.basename(fp)[:-len("_input")] + "_label") or os.path.basename(fp)[:-len("_input")].replace("fan", _("wentylator") + " ")
             fans.append((lbl, v))
         if temps or fans:
             out.append(dict(chip=name, path=os.path.basename(hw), title=SENSOR_NAMES.get(name, name), temps=temps, fans=fans))

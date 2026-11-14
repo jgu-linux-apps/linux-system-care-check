@@ -82,6 +82,7 @@ COMMON = """
 .navigation-sidebar > row.lscc-sep, .navigation-sidebar > row.lscc-sep:hover { background: none; min-height: 0; }
 .navigation-sidebar > row:selected .lscc-chip { background: alpha(white, 0.25); color: inherit; }
 .lscc-ring-small { opacity: 0.7; }
+.lscc-brand { font-size: 16px; font-weight: 800; line-height: 1.05; }
 button:disabled { opacity: 0.45; }
 .lscc-log { font-family: monospace; font-size: 12px; }
 """

@@ -79,7 +79,7 @@ def parse_fwupd(text):
 
 
 def snap_installed_versions():
-    rc, out, _ = run(["snap", "list"], timeout=30)
+    rc, out, _err = run(["snap", "list"], timeout=30)
     vers = {}
     for line in out.splitlines()[1:]:
         p = line.split()

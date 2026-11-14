@@ -11,6 +11,7 @@ import re
 from dataclasses import dataclass, field
 
 from . import safety
+from .i18n import _
 from .sysrun import have, parse_size, run
 
 HOME = os.path.expanduser("~")
@@ -97,7 +98,7 @@ def dpkg_owners(paths):
         return {}
     owners = {}
     for chunk in range(0, len(paths), 200):
-        rc, out, _ = run(["dpkg", "-S", *paths[chunk:chunk + 200]], timeout=60)
+        rc, out, _err = run(["dpkg", "-S", *paths[chunk:chunk + 200]], timeout=60)
         for line in out.splitlines():
             if ": " in line:
                 pkgs, path = line.split(": ", 1)
@@ -108,7 +109,7 @@ def dpkg_owners(paths):
 def apt_sizes(pkgs):
     if not pkgs:
         return {}
-    rc, out, _ = run(["dpkg-query", "-W", "-f=${Package} ${Installed-Size}\n", *sorted(set(pkgs))], timeout=60)
+    rc, out, _err = run(["dpkg-query", "-W", "-f=${Package} ${Installed-Size}\n", *sorted(set(pkgs))], timeout=60)
     sizes = {}
     for line in out.splitlines():
         p = line.split()
@@ -120,7 +121,7 @@ def apt_sizes(pkgs):
 def flatpak_sizes():
     if not have("flatpak"):
         return {}
-    rc, out, _ = run(["flatpak", "list", "--app", "--columns=application,size"], timeout=30)
+    rc, out, _err = run(["flatpak", "list", "--app", "--columns=application,size"], timeout=30)
     return {p[0]: parse_size(p[1]) for p in (line.split("\t") for line in out.splitlines()) if len(p) >= 2}
 
 
@@ -173,7 +174,7 @@ def list_programs(lang="pl"):
             p.size = sz_snap.get(p.ident, 0)
             p.protected = p.ident in safety.PROTECTED_SNAPS
         elif p.source == "webapp":
-            p.note = "skrót + ikona"
+            p.note = _("skrót + ikona")
     # one entry per package: several launchers of one .deb (e.g. LibreOffice) are one program
     merged, by_pkg = [], {}
     for p in progs:

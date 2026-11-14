@@ -25,7 +25,7 @@ def installed():
 
 
 def version():
-    rc, out, _ = run(["dpkg-query", "-W", "-f=${Version}", "timevault"], timeout=10)
+    rc, out, _err = run(["dpkg-query", "-W", "-f=${Version}", "timevault"], timeout=10)
     return out.strip() if rc == 0 else ""
 
 
@@ -139,7 +139,7 @@ def download(url, name, on_progress=None):
 
 def verify_deb(path, tag):
     """The package must be TimeVault, in the version of the release tag. Returns (ok, reason)."""
-    rc, out, _ = run(["dpkg-deb", "-f", path, "Package", "Version", "Maintainer"], timeout=20)
+    rc, out, _err = run(["dpkg-deb", "-f", path, "Package", "Version", "Maintainer"], timeout=20)
     if rc != 0:
         return False, "not a valid .deb package"
     f = {}

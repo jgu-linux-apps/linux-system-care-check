@@ -38,7 +38,7 @@ Part of the **JGu Linux Apps** series. Created by: JGu · Supported by Claude.
 
 ### Look
 
-The themes are System, Aurora, Studio (graphite + amber), Aubergine (aubergine + orange), Solid (flat, calm) and Terminal (monospace, Ubuntu terminal aubergine). Each has a light and a dark variant that follows the system. The app icon switches between light and dark with the system theme, even while the app is closed. Polish and English.
+The themes are System, Aurora, Studio (graphite + amber), Aubergine (aubergine + orange), Solid (flat, calm) and Terminal (monospace, Ubuntu terminal aubergine). Each has a light and a dark variant that follows the system. The app icon switches between light and dark with the system theme, even while the app is closed. Polish and English (follows the system language; `LSCC_LANG=en|pl` forces one).
 
 ## How changes are made
 
@@ -51,7 +51,7 @@ running them.
 ## Install
 
 ```bash
-sudo apt install ./linux-system-care-check_0.4.1_all.deb
+sudo apt install ./linux-system-care-check_0.4.2_all.deb
 ```
 
 Recommended: `udisks2` (drive health), `power-profiles-daemon`, `gnome-shell-extension-appindicator` (tray
@@ -66,6 +66,7 @@ python3 -m unittest discover -s tests -v
 
 ## Version history
 
+- **0.4.2** (2026-11-14): full English user interface. It follows the system language; `LSCC_LANG=en` or `LSCC_LANG=pl` forces one. The sidebar shows the full name "Linux System Care Check" with a bigger icon. Tests check that every text has an English version.
 - **0.4.1** (2026-11-14): the live icon (off / CPU / RAM / temperature / network, and graph or number) can be chosen straight from the tray menu. The F3/F6/F9 keys and the active sort in the htop view are readable (dark text on cyan).
 - **0.4.0** (2026-11-14):
   - **htop view** on the Monitor page (Charts | htop):

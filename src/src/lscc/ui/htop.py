@@ -68,7 +68,7 @@ def uptime_str(s):
     d, s = divmod(int(s), 86400)
     h, s = divmod(s, 3600)
     m, s = divmod(s, 60)
-    return (f"{d} {'dzień' if d == 1 else 'dni'}, " if d else "") + f"{h:02d}:{m:02d}:{s:02d}"
+    return (f"{d} {_('dzień') if d == 1 else _('dni')}, " if d else "") + f"{h:02d}:{m:02d}:{s:02d}"
 
 
 class HtopView(Gtk.Box):

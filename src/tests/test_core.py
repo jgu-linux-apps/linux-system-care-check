@@ -146,6 +146,35 @@ class Procs(unittest.TestCase):
         self.assertEqual(procs.human_rate(1500), "1.5 KB/s")
 
 
+class I18n(unittest.TestCase):
+    def test_no_module_shadows_translate(self):
+        """A local variable named _ (e.g. `rc, out, _ = run(...)`) hides the _() translation function and
+        breaks the texts of that function (0.4.2 regression in Cleanup)."""
+        import ast
+        import glob
+        root = os.path.join(os.path.dirname(__file__), "..", "src", "lscc")
+        bad = []
+        for f in glob.glob(os.path.join(root, "**", "*.py"), recursive=True):
+            for n in ast.walk(ast.parse(open(f, encoding="utf-8").read())):
+                if isinstance(n, ast.Name) and n.id == "_" and isinstance(n.ctx, ast.Store):
+                    bad.append(f"{os.path.basename(f)}:{n.lineno}")
+        self.assertEqual(bad, [])
+
+    def test_every_text_has_english(self):
+        import ast
+        import glob
+        from lscc.i18n_en import EN
+        root = os.path.join(os.path.dirname(__file__), "..", "src", "lscc")
+        missing = set()
+        for f in glob.glob(os.path.join(root, "**", "*.py"), recursive=True):
+            for n in ast.walk(ast.parse(open(f, encoding="utf-8").read())):
+                if (isinstance(n, ast.Call) and getattr(n.func, "id", None) == "_" and n.args
+                        and isinstance(n.args[0], ast.Constant) and isinstance(n.args[0].value, str)):
+                    if n.args[0].value not in EN:
+                        missing.add(n.args[0].value)
+        self.assertEqual(sorted(missing), [])
+
+
 class Background(unittest.TestCase):
     def test_findings_and_snooze(self):
         u = updates.Update("openssl", "1", "2", "apt", security=True)
