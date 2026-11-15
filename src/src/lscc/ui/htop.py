@@ -10,7 +10,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw, Gdk, GLib, Gtk  # noqa: E402
 
-from .. import history, settings  # noqa: E402
+from .. import history, hw, settings  # noqa: E402
 from ..i18n import _  # noqa: E402
 from ..procs import Sampler, fmt_time, human_rate  # noqa: E402
 from ..sysrun import human  # noqa: E402
@@ -62,6 +62,28 @@ def meter(name, parts, text):
     pad = BAR - used - len(text)
     bar = "".join(cells) + " " * max(0, pad) + f"<span foreground='{GREY}'>{esc(text)}</span>"
     return f"<span foreground='{CYAN}'>{esc(name.rjust(4))}</span><b>[</b>{bar}<b>]</b>"
+
+
+SHORT = {"coretemp": "CPU", "k10temp": "CPU", "zenpower": "CPU", "nvme": "NVMe", "acpitz": "ACPI", "amdgpu": "GPU",
+         "nouveau": "GPU", "i915": "iGPU", "iwlwifi_1": "WiFi", "spd5118": "RAM", "jc42": "RAM"}
+
+
+def temps_line(sensors):
+    """htop-like line: CPU 46° · NVMe 45° 35° · ACPI 43° · fan 1900 RPM (colour = how close to the limit)."""
+    parts, fans = [], []
+    for s in sensors:
+        vals = []
+        for _lbl, v, hi, cr in s["temps"][:2]:
+            limit = cr or hi or 100
+            col = RED if v >= limit - 5 else YELLOW if v >= limit - 20 else GREEN
+            vals.append(f"<span foreground='{col}'><b>{v:.0f}°</b></span>")
+        if vals:
+            parts.append(f"{esc(SHORT.get(s['chip'], s['chip'][:6]))} " + " ".join(vals))
+        for _lbl, rpm in s["fans"]:
+            fans.append(f"<b>{rpm}</b> RPM")
+    if fans:
+        parts.append(_("wentylator") + " " + " ".join(fans))
+    return " · ".join(parts) if parts else "—"
 
 
 def uptime_str(s):
@@ -168,7 +190,8 @@ class HtopView(Gtk.Box):
             f"<span foreground='{CYAN}'>Uptime:</span> <b>{esc(uptime_str(d['uptime']))}</b>\n"
             f"<span foreground='{CYAN}'>Net:</span> <span foreground='{GREEN}'>↓ {esc(human_rate(d['rx']))}</span>"
             f"  <span foreground='{RED}'>↑ {esc(human_rate(d['tx']))}</span>\n"
-            f"<span foreground='{CYAN}'>CPU:</span> <b>{(d['cpu'] or 0):.1f}%</b> · {len(cores)} " + _("wątków"))
+            f"<span foreground='{CYAN}'>CPU:</span> <b>{(d['cpu'] or 0):.1f}%</b> · {len(cores)} " + _("wątków") + "\n"
+            f"<span foreground='{CYAN}'>Temp:</span> " + temps_line(hw.sensors()))
 
     def _set_sort(self, key):
         self.sort = key

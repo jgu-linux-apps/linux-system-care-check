@@ -59,6 +59,10 @@ levelbar > trough, levelbar block, scale trough, scale highlight, scale slider {
 .lscc-kicker { letter-spacing: 2px; }
 .navigation-sidebar > row:selected { background-image: none; background: @accent_bg_color; }
 button { box-shadow: inset 0 0 0 1px alpha(@window_fg_color, 0.35); }
+/* window controls and header-bar icon buttons stay like the system draws them: no frame */
+windowcontrols button, headerbar button.image-button, headerbar menubutton > button, button.flat,
+.lscc-stat-card { box-shadow: none; }
+windowcontrols button { border-radius: 999px; }
 """,
     "solid": """
 .card, .lscc-card { box-shadow: 0 0 0 1px alpha(@window_fg_color, 0.08); }
@@ -82,6 +86,10 @@ COMMON = """
 .navigation-sidebar > row.lscc-sep, .navigation-sidebar > row.lscc-sep:hover { background: none; min-height: 0; }
 .navigation-sidebar > row:selected .lscc-chip { background: alpha(white, 0.25); color: inherit; }
 .lscc-ring-small { opacity: 0.7; }
+button.lscc-stat-card { padding: 0; background: none; font-weight: normal; }
+button.lscc-stat-card > box { margin: 0; }
+button.lscc-stat-card:hover > box { background-color: alpha(@accent_bg_color, 0.10); }
+button.lscc-stat-card:hover .lscc-kicker { color: @accent_color; opacity: 1; }
 .lscc-brand { font-size: 16px; font-weight: 800; line-height: 1.05; }
 button:disabled { opacity: 0.45; }
 .lscc-log { font-family: monospace; font-size: 12px; }

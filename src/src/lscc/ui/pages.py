@@ -208,12 +208,22 @@ class OverviewPage(Gtk.Box):
                  (_("Bateria"), f"{min(100, bat[0])}%" if bat else "—",
                   (_("pojemności fabrycznej") + (f" · {bat[1]} {_('cykli')}" if bat and bat[1] else "")) if bat else _("brak baterii")),
                  (_("Temperatury"), f"{temp:.0f}°" if temp else "—", _("procesor"))]
+        targets = ("updates", "disk", "battery", "temps")      # karty prowadza do szczegolow
         for i, (t, big, small) in enumerate(stats):
             c = card(spacing=2)
-            c.append(label(t.upper(), "lscc-kicker"))
+            top = Gtk.Box(spacing=4)
+            top.append(label(t.upper(), "lscc-kicker", wrap=False))
+            top.append(Gtk.Box(hexpand=True))
+            top.append(Gtk.Image(icon_name="go-next-symbolic", pixel_size=12, opacity=0.5))
+            c.append(top)
             c.append(label(big, "lscc-stat"))
             c.append(label(small, "dim-label caption"))
-            grid.attach(c, i, 0, 1, 1)
+            btn = Gtk.Button(child=c, tooltip_text=_("Pokaż"))
+            btn.add_css_class("lscc-stat-card")
+            btn.add_css_class("flat")
+            btn.set_cursor_from_name("pointer")
+            btn.connect("clicked", lambda *_a, k=targets[i]: self.win.show_page(k))
+            grid.attach(btn, i, 0, 1, 1)
         self.box.append(grid)
 
         self.box.append(self._trend())

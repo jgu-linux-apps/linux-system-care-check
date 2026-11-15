@@ -51,7 +51,7 @@ running them.
 ## Install
 
 ```bash
-sudo apt install ./linux-system-care-check_0.4.2_all.deb
+sudo apt install ./linux-system-care-check_0.4.3_all.deb
 ```
 
 Recommended: `udisks2` (drive health), `power-profiles-daemon`, `gnome-shell-extension-appindicator` (tray
@@ -66,6 +66,10 @@ python3 -m unittest discover -s tests -v
 
 ## Version history
 
+- **0.4.3** (2026-11-15):
+  - Overview: the Updates, Disk, Battery and Temperatures cards are clickable. They open Updates, Disk, Battery and Monitor.
+  - Monitor's htop view shows a temperature line: CPU, NVMe, board and fans, coloured by how close each one is to its limit.
+  - Terminal theme: the window buttons (minimize, maximize, close) and header-bar icon buttons have no frame.
 - **0.4.2** (2026-11-14): full English user interface. It follows the system language; `LSCC_LANG=en` or `LSCC_LANG=pl` forces one. The sidebar shows the full name "Linux System Care Check" with a bigger icon. Tests check that every text has an English version.
 - **0.4.1** (2026-11-14): the live icon (off / CPU / RAM / temperature / network, and graph or number) can be chosen straight from the tray menu. The F3/F6/F9 keys and the active sort in the htop view are readable (dark text on cyan).
 - **0.4.0** (2026-11-14):
