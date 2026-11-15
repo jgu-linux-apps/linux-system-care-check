@@ -26,6 +26,7 @@ DEFAULTS = {
     "monitor_view": "charts",     # charts | htop
     "tray_live": "off",           # off | cpu | ram | temp | net — live tray icon
     "tray_live_style": "graph",   # graph | number
+    "language": "auto",           # auto (system) | pl | en — read at start (i18n)
     "renderer": "auto",           # auto (GTK default) | gl | vulkan | cairo — read by the launcher         # consent: start a TimeVault backup when the last one is older than 7 days
 }
 

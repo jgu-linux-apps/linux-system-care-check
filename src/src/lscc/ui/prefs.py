@@ -26,6 +26,14 @@ class Prefs(Adw.PreferencesDialog):
         row = Adw.ComboRow(title=_("Motyw"), model=model, selected=THEMES.index(s["theme"]) if s["theme"] in THEMES else 0)
         row.connect("notify::selected", self._theme)
         look.add(row)
+        langs = ["auto", "pl", "en"]
+        cur = s.get("language", "auto")
+        lr = Adw.ComboRow(title=_("Język") + (" · Language" if _("Język") == "Język" else " · Język"),
+                          subtitle=_("Automatyczny = język systemu. Zmiana po ponownym uruchomieniu."),
+                          model=Gtk.StringList.new([_("Automatyczny"), "Polski", "English"]),
+                          selected=langs.index(cur) if cur in langs else 0)
+        lr.connect("notify::selected", lambda r, _p: self._language(langs[r.get_selected()]))
+        look.add(lr)
         rend = ["auto", "gl", "vulkan", "cairo"]
         rr = Adw.ComboRow(title=_("Renderer"), subtitle=_("Do rozwiązywania problemów z wyświetlaniem. "
                                                           "Zmiana po ponownym uruchomieniu aplikacji."),
@@ -54,6 +62,23 @@ class Prefs(Adw.PreferencesDialog):
         page.add(self._auto(s))
         page.add(self._system())
         self.add(page)
+
+    def _language(self, value):
+        settings.save(language=value)
+        d = Adw.AlertDialog(heading=_("Uruchomić ponownie?"),
+                            body=_("Nowy język pojawi się po ponownym uruchomieniu aplikacji. Ikona w trayu przełączy się sama."))
+        d.add_response("later", _("Później"))
+        d.add_response("restart", _("Uruchom ponownie"))
+        d.set_response_appearance("restart", Adw.ResponseAppearance.SUGGESTED)
+        d.set_default_response("restart")
+        d.connect("response", lambda _d, r: r == "restart" and self._restart())
+        d.present(self)
+
+    @staticmethod
+    def _restart():
+        import os
+        import sys
+        os.execv(sys.executable, [sys.executable] + sys.argv)
 
     def _switch(self, title, subtitle, key, s):
         sw = Adw.SwitchRow(title=title, subtitle=subtitle, active=bool(s.get(key)))

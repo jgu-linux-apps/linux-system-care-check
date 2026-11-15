@@ -109,6 +109,13 @@ class Background:
     # ------------------------------------------------ settings / tray
     def _settings_changed(self):
         s = settings.load()
+        from . import i18n
+        if i18n._lang() != i18n.LANG:                      # Settings → Language: restart in the new language
+            if self.tray is not None:
+                self.tray.close()
+            self.notifier.close_all()
+            import sys
+            os.execv(sys.executable, [sys.executable] + sys.argv)
         if not s["background_checks"] and not s["tray"]:
             self.loop.quit()
             return False

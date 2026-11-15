@@ -283,4 +283,12 @@ EN = {
     # about
     "Centrum opieki nad systemem Ubuntu: aktualizacje, sprzątanie, programy i kopie zapasowe z Linux Backup TimeVault — bez niespodzianek.":
         "A care center for Ubuntu: updates, cleanup, programs and backups with Linux Backup TimeVault — with no surprises.",
+    "Język": "Language",
+    "Automatyczny = język systemu. Zmiana po ponownym uruchomieniu.": "Automatic = system language. Takes effect after a restart.",
+    "Uruchomić ponownie?": "Restart now?",
+    "Nowy język pojawi się po ponownym uruchomieniu aplikacji. Ikona w trayu przełączy się sama.": "The new language shows after the app restarts. The tray icon switches by itself.",
+    "Uruchom ponownie": "Restart",
+    "NAJWIĘCEJ ZASOBÓW": "TOP PROCESSES",
+    "Rozwiń htop": "Open htop",
+    "Sprawdzam procesy…": "Checking processes…",
 }

@@ -51,7 +51,7 @@ running them.
 ## Install
 
 ```bash
-sudo apt install ./linux-system-care-check_0.4.3_all.deb
+sudo apt install ./linux-system-care-check_0.4.4_all.deb
 ```
 
 Recommended: `udisks2` (drive health), `power-profiles-daemon`, `gnome-shell-extension-appindicator` (tray
@@ -66,6 +66,10 @@ python3 -m unittest discover -s tests -v
 
 ## Version history
 
+- **0.4.4** (2026-11-15):
+  - Overview: a "Top processes · htop" card above "Recent" shows the three processes using the most CPU, live. "Open htop" jumps to Monitor's htop view.
+  - The htop view and the card follow light and dark mode: a light terminal palette in light mode, the aubergine terminal in dark mode.
+  - Settings → Language · Język: Automatic, Polski or English. The app offers a restart; the tray icon switches language on its own.
 - **0.4.3** (2026-11-15):
   - Overview: the Updates, Disk, Battery and Temperatures cards are clickable. They open Updates, Disk, Battery and Monitor.
   - Monitor's htop view shows a temperature line: CPU, NVMe, board and fans, coloured by how close each one is to its limit.

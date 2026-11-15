@@ -228,6 +228,8 @@ class OverviewPage(Gtk.Box):
 
         self.box.append(self._trend())
 
+        self.box.append(self._top_procs())
+
         recent = history.entries(4)
         if recent:
             c = card(spacing=6)
@@ -240,6 +242,63 @@ class OverviewPage(Gtk.Box):
                 r.append(label(time.strftime("%d.%m %H:%M", time.localtime(e.get("ts", 0))), "dim-label caption"))
                 c.append(r)
             self.box.append(c)
+
+    # ---------------------------------------------------------------- top processes (htop preview)
+    def _top_procs(self):
+        from . import htop
+        from ..procs import Sampler
+        sampler = Sampler()
+        try:
+            sampler.sample()                                    # CPU% needs two samples
+        except OSError:
+            pass
+        htop._install_css()
+        c = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        for cls in ("card", "lscc-htop", "lscc-htop-mini"):
+            c.add_css_class(cls)
+        top = Gtk.Box(spacing=8)
+        top.append(Gtk.Label(label=_("NAJWIĘCEJ ZASOBÓW") + " · htop", xalign=0))
+        top.append(Gtk.Box(hexpand=True))
+        expand = Gtk.Button(valign=Gtk.Align.CENTER)
+        expand.add_css_class("fkey")
+        bx = Gtk.Box(spacing=6)
+        bx.append(Gtk.Label(label=_("Rozwiń htop")))
+        bx.append(Gtk.Image(icon_name="go-next-symbolic", pixel_size=12))
+        expand.set_child(bx)
+        expand.connect("clicked", lambda *_a: self._open_htop())
+        top.append(expand)
+        c.append(top)
+        head = Gtk.Label(xalign=0, ellipsize=3, width_chars=10)
+        head.add_css_class("hdr")
+        head.set_text(f"{'PID':>7} {'USER':<9} {'CPU%':>5} {'MEM%':>5} {'RES':>8}  COMMAND")
+        c.append(head)
+        rows = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        rows.append(label(_("Sprawdzam procesy…"), "dim-label caption"))
+        c.append(rows)
+
+        def tick():
+            if c.get_parent() is None:
+                return False                                   # page rebuilt: stop the timer
+            try:
+                d = sampler.sample()
+            except OSError:
+                return True
+            htop.follow_style(c)
+            me = os.getpid()
+            procs = sorted((p for p in d["procs"] if p["pid"] != me), key=lambda p: (-p["cpu"], -p["mem"]))[:3]
+            clear(rows)
+            for p in procs:
+                rows.append(htop.proc_line(p, short=True))
+            return True
+        GLib.timeout_add(900, lambda: (tick(), GLib.timeout_add_seconds(2, tick), False)[2])
+        return c
+
+    def _open_htop(self):
+        settings.save(monitor_view="htop")
+        page = self.win.built.get("temps")
+        if page is not None:
+            page.refresh()
+        self.win.show_page("temps")
 
     @staticmethod
     def _trend():
