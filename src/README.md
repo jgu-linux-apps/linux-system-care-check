@@ -51,7 +51,7 @@ running them.
 ## Install
 
 ```bash
-sudo apt install ./linux-system-care-check_0.4.6_all.deb
+sudo apt install ./linux-system-care-check_0.4.7_all.deb
 ```
 
 Recommended: `udisks2` (drive health), `power-profiles-daemon`, `gnome-shell-extension-appindicator` (tray
@@ -66,6 +66,8 @@ python3 -m unittest discover -s tests -v
 
 ## Version history
 
+- **0.4.7** (2026-11-16): the app's logo and name sit in the sidebar's title bar, larger; both title bars
+  are taller and level.
 - **0.4.6** (2026-11-16): history entries (Overview "Recently" and History) follow the chosen language,
   also for entries saved earlier in the other language.
 - **0.4.5** (2026-11-16): new Hologram theme (light and dark): cyan neon HUD, smoked-glass panels, a faint grid,

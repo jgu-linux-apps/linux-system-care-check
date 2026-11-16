@@ -40,13 +40,13 @@ class Window(Adw.ApplicationWindow):
         # sidebar
         sb = Adw.ToolbarView()
         sh = Adw.HeaderBar(show_title=False)
+        sh.add_css_class("lscc-tall")
         menu = Gtk.MenuButton(icon_name="open-menu-symbolic", menu_model=self._menu(), primary=True)
         sh.pack_end(menu)
-        sb.add_top_bar(sh)
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        brand = Gtk.Box(spacing=14, margin_start=16, margin_end=12, margin_top=6, margin_bottom=22)
-        brand.append(Gtk.Image(icon_name="io.github.jgu.LinuxSystemCareCheck", pixel_size=56, valign=Gtk.Align.CENTER))
-        col = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2, valign=Gtk.Align.CENTER)
+        # brand lives in the sidebar's header bar, level with the content's title bar
+        brand = Gtk.Box(spacing=12, margin_start=6)
+        brand.append(Gtk.Image(icon_name="io.github.jgu.LinuxSystemCareCheck", pixel_size=52, valign=Gtk.Align.CENTER))
+        col = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1, valign=Gtk.Align.CENTER)
         t = Gtk.Label(label="Linux System\nCare Check", xalign=0, justify=Gtk.Justification.LEFT)
         t.add_css_class("lscc-brand")
         col.append(t)
@@ -55,7 +55,9 @@ class Window(Adw.ApplicationWindow):
         s.add_css_class("caption")
         col.append(s)
         brand.append(col)
-        box.append(brand)
+        sh.pack_start(brand)
+        sb.add_top_bar(sh)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, margin_top=10)
         self.list = Gtk.ListBox()
         self.list.add_css_class("navigation-sidebar")
         for key, title, icon, _cls in PAGES:
@@ -87,6 +89,7 @@ class Window(Adw.ApplicationWindow):
         # content
         self.content_tv = Adw.ToolbarView()
         self.content_hb = Adw.HeaderBar()
+        self.content_hb.add_css_class("lscc-tall")
         self.content_tv.add_top_bar(self.content_hb)
         pv = Gtk.Box(spacing=8, tooltip_text=_("Tryb podglądu: aplikacja pokazuje polecenia, ale niczego nie zmienia"))
         pv.append(Gtk.Label(label=_("Podgląd")))

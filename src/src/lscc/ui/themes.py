@@ -99,7 +99,6 @@ button.flat, windowcontrols button, headerbar button.image-button, button.lscc-s
 /* header-bar buttons stay frameless, so both top bars keep the same height */
 headerbar button, headerbar menubutton > button { border: none; background: none; box-shadow: none; }
 headerbar button:hover, headerbar menubutton > button:hover { background: alpha(currentColor, 0.12); }
-headerbar > windowhandle > box { min-height: 46px; }
 .navigation-sidebar > row:selected { font-weight: 700; }
 """
 EXTRA_MODE = {
@@ -195,7 +194,8 @@ button.lscc-stat-card { padding: 0; background: none; font-weight: normal; }
 button.lscc-stat-card > box { margin: 0; }
 button.lscc-stat-card:hover > box { background-color: alpha(@accent_bg_color, 0.10); }
 button.lscc-stat-card:hover .lscc-kicker { color: @accent_color; opacity: 1; }
-.lscc-brand { font-size: 16px; font-weight: 800; line-height: 1.05; }
+.lscc-brand { font-size: 17px; font-weight: 800; line-height: 1.05; }
+headerbar.lscc-tall > windowhandle > box { min-height: 80px; }
 button:disabled { opacity: 0.45; }
 .lscc-log { font-family: monospace; font-size: 12px; }
 """

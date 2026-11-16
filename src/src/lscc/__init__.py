@@ -1,5 +1,5 @@
 """Linux System Care Check — system care center for Ubuntu with GNOME Shell (JGu Linux Apps series)."""
-VERSION = "0.4.6"
+VERSION = "0.4.7"
 BUILD_DATE = "2026-11-14"
 APP_ID = "io.github.jgu.LinuxSystemCareCheck"
 PKG_NAME = "linux-system-care-check"
