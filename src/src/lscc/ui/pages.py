@@ -10,7 +10,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, Gio, GLib, Gtk  # noqa: E402
 
 from .. import cleanup, health, helperclient, history, programs, safety, settings, timevault, updates  # noqa: E402
-from ..i18n import _  # noqa: E402
+from ..i18n import _, stored  # noqa: E402
 from ..sysrun import human, run  # noqa: E402
 from .common import Ring, card, chip, clear, confirm, in_background, label, page_box, scrolled, ProgressDialog  # noqa: E402
 
@@ -236,7 +236,7 @@ class OverviewPage(Gtk.Box):
             c.append(label(_("OSTATNIO"), "lscc-kicker"))
             for e in recent:
                 r = Gtk.Box(spacing=8)
-                r.append(label(("✓ " if e.get("ok") else "✗ ") + e.get("title", "") +
+                r.append(label(("✓ " if e.get("ok") else "✗ ") + stored(e.get("title", "")) +
                                (" (" + _("podgląd") + ")" if e.get("preview") else "")))
                 r.append(Gtk.Box(hexpand=True))
                 r.append(label(time.strftime("%d.%m %H:%M", time.localtime(e.get("ts", 0))), "dim-label caption"))
@@ -963,7 +963,7 @@ class HistoryPage(Gtk.Box):
                 sub += f" · {_('przed zmianą: kopia TimeVault')} {e['backup']}"
             if e.get("preview"):
                 sub += " · " + _("tryb podglądu (bez zmian)")
-            r = Adw.ActionRow(title=("✓ " if e.get("ok") else "✗ ") + GLib.markup_escape_text(e.get("title", "")),
+            r = Adw.ActionRow(title=("✓ " if e.get("ok") else "✗ ") + GLib.markup_escape_text(stored(e.get("title", ""))),
                               subtitle=GLib.markup_escape_text(sub))
             u = e.get("undo") or {}
             if u.get("type") == "reinstall" and not e.get("preview") and (u.get("apt") or u.get("snap") or u.get("flatpak")):

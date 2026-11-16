@@ -39,3 +39,19 @@ from .i18n_en import EN  # noqa: E402
 
 def _(s):
     return EN.get(s, s) if LANG == "en" else s
+
+
+_PL = {v: k for k, v in EN.items()}
+
+
+def stored(s):
+    """Show a text saved earlier (e.g. a history title) in the current language, whichever language it was
+    written in: the whole text, or its leading part before ": ", " · " or " (" (the rest is data)."""
+    table = EN if LANG == "en" else _PL
+    if s in table:
+        return table[s]
+    for sep in (": ", " · ", " ("):
+        head, found, tail = s.partition(sep)
+        if found and head in table:
+            return table[head] + sep + tail
+    return s

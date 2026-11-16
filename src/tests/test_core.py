@@ -189,5 +189,19 @@ class Background(unittest.TestCase):
         self.assertEqual(background.findings([], [], (10, 100), False, None, False, [], None), [])
 
 
+    def test_stored_texts_follow_language(self):
+        from lscc import i18n
+        old = i18n.LANG
+        try:
+            i18n.LANG = "en"
+            self.assertEqual(i18n.stored("Aktualizacje: 2"), "Updates: 2")
+            self.assertEqual(i18n.stored("Sprzątanie · 6.4 GB"), "Cleanup · 6.4 GB")
+            self.assertEqual(i18n.stored("Odinstalowano: A, B"), "Uninstalled: A, B")
+            self.assertEqual(i18n.stored("something else: x"), "something else: x")
+            i18n.LANG = "pl"
+            self.assertEqual(i18n.stored("Updates: 2"), "Aktualizacje: 2")
+        finally:
+            i18n.LANG = old
+
 if __name__ == "__main__":
     unittest.main()
