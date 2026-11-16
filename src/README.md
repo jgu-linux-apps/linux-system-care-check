@@ -38,7 +38,7 @@ Part of the **JGu Linux Apps** series. Created by: JGu · Supported by Claude.
 
 ### Look
 
-The themes are System, Aurora, Studio (graphite + amber), Aubergine (aubergine + orange), Solid (flat, calm) and Terminal (monospace, Ubuntu terminal aubergine). Each has a light and a dark variant that follows the system. The app icon switches between light and dark with the system theme, even while the app is closed. Polish and English (follows the system language; `LSCC_LANG=en|pl` forces one).
+The themes are System, Aurora, Studio (graphite + amber), Aubergine (aubergine + orange), Solid (flat, calm), Terminal (monospace, Ubuntu terminal aubergine) and Hologram (cyan neon HUD on smoked glass). Each has a light and a dark variant that follows the system. The app icon switches between light and dark with the system theme, even while the app is closed. Polish and English (follows the system language; `LSCC_LANG=en|pl` forces one).
 
 ## How changes are made
 
@@ -51,7 +51,7 @@ running them.
 ## Install
 
 ```bash
-sudo apt install ./linux-system-care-check_0.4.4_all.deb
+sudo apt install ./linux-system-care-check_0.4.5_all.deb
 ```
 
 Recommended: `udisks2` (drive health), `power-profiles-daemon`, `gnome-shell-extension-appindicator` (tray
@@ -66,6 +66,8 @@ python3 -m unittest discover -s tests -v
 
 ## Version history
 
+- **0.4.5** (2026-11-16): new Hologram theme (light and dark): cyan neon HUD, smoked-glass panels, a faint grid,
+  equal top bars; charts and the htop view follow it.
 - **0.4.4** (2026-11-15):
   - Overview: a "Top processes · htop" card above "Recent" shows the three processes using the most CPU, live. "Open htop" jumps to Monitor's htop view.
   - The htop view and the card follow light and dark mode: a light terminal palette in light mode, the aubergine terminal in dark mode.

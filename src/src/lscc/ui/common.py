@@ -124,7 +124,8 @@ class Chart(Gtk.DrawingArea):
         ctx = self.get_style_context()
         ok, acc = ctx.lookup_color("accent_bg_color")
         if kind == "warn":
-            return (0.96, 0.62, 0.04)
+            okw, wc = ctx.lookup_color("lscc_warn")
+            return (wc.red, wc.green, wc.blue) if okw else (0.96, 0.62, 0.04)
         if kind == "accent2":
             ok2, a2 = ctx.lookup_color("lscc_accent2")
             if ok2:

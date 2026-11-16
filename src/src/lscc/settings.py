@@ -8,7 +8,7 @@ DIR = os.path.join(GLib.get_user_config_dir(), "linux-system-care-check")
 FILE = os.path.join(DIR, "settings.json")
 PATH = FILE
 DEFAULTS = {
-    "theme": "system",            # system | aurora | studio | aubergine
+    "theme": "system",            # system | aurora | studio | aubergine | solid | terminal | hologram
     "preview": True,              # preview mode: show what would happen, change nothing
     "backup_before_uninstall": True,
     "backup_before_kernels": True,

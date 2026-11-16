@@ -10,7 +10,7 @@ from ..i18n import _  # noqa: E402
 from .themes import THEMES  # noqa: E402
 
 THEME_NAMES = {"system": "System", "aurora": "Aurora", "studio": "Studio", "aubergine": "Aubergine", "solid": "Solid",
-               "terminal": "Terminal"}
+               "terminal": "Terminal", "hologram": "Hologram"}
 
 
 class Prefs(Adw.PreferencesDialog):

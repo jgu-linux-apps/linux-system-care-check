@@ -31,7 +31,8 @@ def use_palette(dark):
 def follow_style(widget):
     """Light htop in light mode, aubergine in dark mode; call before building markup."""
     dark = Adw.StyleManager.get_default().get_dark()
-    use_palette(dark)
+    # Hologram draws htop on dark smoked glass in both modes, so it always needs the bright text colours
+    use_palette(dark or settings.load()["theme"] == "hologram")
     if dark:
         widget.remove_css_class("light")
     else:
