@@ -51,7 +51,7 @@ running them.
 ## Install
 
 ```bash
-sudo apt install ./linux-system-care-check_0.4.8_all.deb
+sudo apt install ./linux-system-care-check_0.4.9_all.deb
 ```
 
 Recommended: `udisks2` (drive health), `power-profiles-daemon`, `gnome-shell-extension-appindicator` (tray
@@ -66,6 +66,8 @@ python3 -m unittest discover -s tests -v
 
 ## Version history
 
+- **0.4.9** (2026-11-16): the tray icon no longer disappears after changing the language (the background
+  process restarts in place); it also re-registers by itself if the tray host loses it.
 - **0.4.8** (2026-11-16): normal-height title bars with a glass sheen; the app's name and menu sit fixed in
   the sidebar's bottom-left corner; more space between sidebar items and sections.
 - **0.4.7** (2026-11-16): the app's logo and name sit in the sidebar's title bar, larger; both title bars

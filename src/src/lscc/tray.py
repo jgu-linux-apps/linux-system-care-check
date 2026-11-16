@@ -2,6 +2,7 @@
 extension and KDE) implemented directly on GDBus - no GTK3 / libappindicator needed."""
 
 import os
+import time
 
 from gi.repository import Gio, GLib
 
@@ -105,7 +106,9 @@ class Tray:
         self.revision = 1
         self.bus = None
         self.reg_ids = []
-        self.bus_name = "org.kde.StatusNotifierItem-%d-1" % os.getpid()
+        # unique per start: a restart in place (os.execv, e.g. after a language change) keeps the PID, and the
+        # host would drop the new icon together with the old one if both had the same name
+        self.bus_name = "org.kde.StatusNotifierItem-%d-%d" % (os.getpid(), int(time.time() * 1000) % 1000000)
         self._sni_info = Gio.DBusNodeInfo.new_for_xml(SNI_XML).interfaces[0]
         self._menu_info = Gio.DBusNodeInfo.new_for_xml(MENU_XML).interfaces[0]
         try:
@@ -117,11 +120,13 @@ class Tray:
         self.own_id = Gio.bus_own_name_on_connection(self.bus, self.bus_name, Gio.BusNameOwnerFlags.NONE, None, None)
         self.watch_id = Gio.bus_watch_name_on_connection(self.bus, "org.kde.StatusNotifierWatcher", Gio.BusNameWatcherFlags.NONE,
                                          self._watcher_appeared, None)
+        self.check_id = GLib.timeout_add_seconds(5, self._ensure_registered)
 
     def close(self):
         """Remove the icon: drop the bus name and the exported objects."""
         if self.bus is None:
             return
+        GLib.source_remove(self.check_id)
         Gio.bus_unwatch_name(self.watch_id)
         Gio.bus_unown_name(self.own_id)
         for rid in self.reg_ids:
@@ -134,6 +139,27 @@ class Tray:
         conn.call("org.kde.StatusNotifierWatcher", "/StatusNotifierWatcher", "org.kde.StatusNotifierWatcher",
                   "RegisterStatusNotifierItem", GLib.Variant("(s)", (self.bus_name,)), None,
                   Gio.DBusCallFlags.NONE, -1, None, None, None)
+
+    def _ensure_registered(self):
+        """Re-register if the tray host lost the icon (shell restart, a race with an old instance)."""
+        if self.bus is None:
+            return False
+        def done(conn, res):
+            try:
+                items = conn.call_finish(res).unpack()[0]
+            except GLib.Error:
+                return                                      # no tray host now; _watcher_appeared registers later
+            mine = (self.bus_name, conn.get_unique_name())
+            if not any(i.split("/")[0] in mine for i in items):
+                self._watcher_appeared(conn, None, None)
+        self.bus.call("org.kde.StatusNotifierWatcher", "/StatusNotifierWatcher", "org.freedesktop.DBus.Properties", "Get",
+                      GLib.Variant("(ss)", ("org.kde.StatusNotifierWatcher", "RegisteredStatusNotifierItems")),
+                      None, Gio.DBusCallFlags.NONE, -1, None, done)
+        if self.check_id and getattr(self, "_slow", False) is False:
+            self._slow = True
+            self.check_id = GLib.timeout_add_seconds(60, self._ensure_registered)
+            return False
+        return True
 
     # ------------------------------------------------ public API
     def set_pixmap(self, width, height, argb):
