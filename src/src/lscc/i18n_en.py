@@ -1,6 +1,7 @@
 """English texts (the source strings in the code are Polish)."""
 EN = {
     # navigation / pages
+    "Menu": "Menu",
     "Przegląd": "Overview", "Aktualizacje": "Updates", "Sprzątanie": "Cleanup", "Programy": "Programs",
     "Autostart": "Autostart", "SPRZĘT": "HARDWARE", "Dysk": "Disk", "Bateria": "Battery", "Monitor": "Monitor",
     "KOPIE I HISTORIA": "BACKUP AND HISTORY", "Historia i przywracanie": "History and restore",

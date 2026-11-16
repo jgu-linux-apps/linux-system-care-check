@@ -97,7 +97,7 @@ scale trough, scale highlight { border-radius: 6px; }
 .navigation-sidebar { background: transparent; }
 button.flat, windowcontrols button, headerbar button.image-button, button.lscc-stat-card { border: none; background: none; box-shadow: none; }
 /* header-bar buttons stay frameless, so both top bars keep the same height */
-headerbar button, headerbar menubutton > button { border: none; background: none; box-shadow: none; }
+headerbar button, headerbar menubutton > button, menubutton.flat > button { border: none; background: none; box-shadow: none; }
 headerbar button:hover, headerbar menubutton > button:hover { background: alpha(currentColor, 0.12); }
 .navigation-sidebar > row:selected { font-weight: 700; }
 """
@@ -112,8 +112,8 @@ EXTRA_MODE = {
 .lscc-title { color: #e6fdff; }
 .lscc-stat, .lscc-big { color: #7df3ff; }
 headerbar, headerbar:backdrop, .sidebar-pane headerbar, .sidebar-pane headerbar:backdrop {
-  background: #031620; background-image: none; color: #9ff6ff; box-shadow: none; }
-toolbarview > .top-bar, .top-bar { background-color: #031620; box-shadow: inset 0 -1px alpha(#22e6ff, 0.6); }
+  background-color: #031620; background-image: linear-gradient(180deg, alpha(#22e6ff, 0.10), alpha(#22e6ff, 0.02)); color: #9ff6ff; box-shadow: none; }
+toolbarview > .top-bar, .top-bar { background-color: #031620; background-image: linear-gradient(180deg, alpha(#22e6ff, 0.10), alpha(#22e6ff, 0.02)); box-shadow: inset 0 -1px alpha(#22e6ff, 0.6); }
 .sidebar-pane headerbar, .sidebar-pane headerbar:backdrop { box-shadow: inset 0 -1px alpha(#22e6ff, 0.6); }
 headerbar .title { color: #9ff6ff; }
 .sidebar-pane { background-color: alpha(#02101a, 0.62);
@@ -139,15 +139,16 @@ popover > contents, dialog { background-color: alpha(#05202c, 0.94); }
 .lscc-title { color: #04293a; }
 .lscc-stat, .lscc-big { color: #0369a1; }
 headerbar, headerbar:backdrop, .sidebar-pane headerbar, .sidebar-pane headerbar:backdrop {
-  background: #06283a; background-image: none; color: #bff6ff; box-shadow: none; }
-toolbarview > .top-bar, .top-bar { background-color: #06283a; box-shadow: inset 0 -1px alpha(#22d3ee, 0.85); }
+  background-color: #06283a; background-image: linear-gradient(180deg, alpha(#7df3ff, 0.14), alpha(#22d3ee, 0.03)); color: #bff6ff; box-shadow: none; }
+toolbarview > .top-bar, .top-bar { background-color: #06283a; background-image: linear-gradient(180deg, alpha(#7df3ff, 0.14), alpha(#22d3ee, 0.03)); box-shadow: inset 0 -1px alpha(#22d3ee, 0.85); }
 .sidebar-pane headerbar, .sidebar-pane headerbar:backdrop { box-shadow: inset 0 -1px alpha(#22d3ee, 0.85); }
 headerbar .title, headerbar label, headerbar image { color: #9ff3ff; }
 .sidebar-pane { background-color: alpha(#05202e, 0.86);
   background-image: linear-gradient(180deg, alpha(#22d3ee, 0.10), alpha(#22d3ee, 0.0) 35%, alpha(#0284c7, 0.08));
   box-shadow: inset -2px 0 alpha(#22d3ee, 0.6); }
-.sidebar-pane, .sidebar-pane label { color: #d6fbff; }
+.sidebar-pane, .sidebar-pane label, .sidebar-pane image { color: #d6fbff; }
 .sidebar-pane .dim-label, .sidebar-pane .lscc-kicker { color: #22d3ee; }
+.lscc-foot { border-top: 1px solid alpha(#22d3ee, 0.35); }
 .navigation-sidebar > row:selected { box-shadow: 0 0 18px alpha(#22d3ee, 0.6); }
 .navigation-sidebar image { color: #22d3ee; }
 .navigation-sidebar > row:selected image, .navigation-sidebar > row:selected label { color: #ffffff; }
@@ -194,8 +195,9 @@ button.lscc-stat-card { padding: 0; background: none; font-weight: normal; }
 button.lscc-stat-card > box { margin: 0; }
 button.lscc-stat-card:hover > box { background-color: alpha(@accent_bg_color, 0.10); }
 button.lscc-stat-card:hover .lscc-kicker { color: @accent_color; opacity: 1; }
-.lscc-brand { font-size: 17px; font-weight: 800; line-height: 1.05; }
-headerbar.lscc-tall > windowhandle > box { min-height: 80px; }
+.lscc-brand { font-size: 13px; font-weight: 800; line-height: 1.05; }
+.lscc-foot { border-top: 1px solid alpha(currentColor, 0.10); padding-top: 4px; }
+.lscc-foot .lscc-brand { line-height: 1.15; }
 button:disabled { opacity: 0.45; }
 .lscc-log { font-family: monospace; font-size: 12px; }
 """

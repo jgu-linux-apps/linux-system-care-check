@@ -40,13 +40,12 @@ class Window(Adw.ApplicationWindow):
         # sidebar
         sb = Adw.ToolbarView()
         sh = Adw.HeaderBar(show_title=False)
-        sh.add_css_class("lscc-tall")
-        menu = Gtk.MenuButton(icon_name="open-menu-symbolic", menu_model=self._menu(), primary=True)
-        sh.pack_end(menu)
-        # brand lives in the sidebar's header bar, level with the content's title bar
-        brand = Gtk.Box(spacing=12, margin_start=6)
-        brand.append(Gtk.Image(icon_name="io.github.jgu.LinuxSystemCareCheck", pixel_size=52, valign=Gtk.Align.CENTER))
-        col = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1, valign=Gtk.Align.CENTER)
+        sb.add_top_bar(sh)
+        # brand and the app menu: fixed in the sidebar's bottom-left corner
+        foot = Gtk.Box(spacing=14, margin_start=18, margin_end=12, margin_top=18, margin_bottom=18)
+        foot.add_css_class("lscc-foot")
+        foot.append(Gtk.Image(icon_name="io.github.jgu.LinuxSystemCareCheck", pixel_size=36, valign=Gtk.Align.CENTER))
+        col = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4, valign=Gtk.Align.CENTER, hexpand=True)
         t = Gtk.Label(label="Linux System\nCare Check", xalign=0, justify=Gtk.Justification.LEFT)
         t.add_css_class("lscc-brand")
         col.append(t)
@@ -54,9 +53,12 @@ class Window(Adw.ApplicationWindow):
         s.add_css_class("dim-label")
         s.add_css_class("caption")
         col.append(s)
-        brand.append(col)
-        sh.pack_start(brand)
-        sb.add_top_bar(sh)
+        foot.append(col)
+        menu = Gtk.MenuButton(icon_name="open-menu-symbolic", menu_model=self._menu(), primary=True,
+                              direction=Gtk.ArrowType.UP, valign=Gtk.Align.CENTER, tooltip_text=_("Menu"))
+        menu.add_css_class("flat")
+        foot.append(menu)
+        sb.add_bottom_bar(foot)
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, margin_top=10)
         self.list = Gtk.ListBox()
         self.list.add_css_class("navigation-sidebar")
@@ -65,11 +67,11 @@ class Window(Adw.ApplicationWindow):
                 sep = Gtk.ListBoxRow(selectable=False, activatable=False, can_focus=False)
                 sep.add_css_class("lscc-sep")
                 sep.set_child(Gtk.Label(label=_(title or ""), xalign=0, css_classes=["lscc-kicker"],
-                                        margin_top=10, margin_start=10))
+                                        margin_top=24, margin_bottom=10, margin_start=10))
                 self.list.append(sep)
                 continue
             row = Gtk.ListBoxRow()
-            rb = Gtk.Box(spacing=12, margin_top=8, margin_bottom=8, margin_start=6, margin_end=6)
+            rb = Gtk.Box(spacing=12, margin_top=10, margin_bottom=10, margin_start=6, margin_end=6)
             rb.append(Gtk.Image(icon_name=icon))
             lb = Gtk.Label(label=_(title), xalign=0, hexpand=True, ellipsize=3)
             rb.append(lb)
@@ -89,7 +91,6 @@ class Window(Adw.ApplicationWindow):
         # content
         self.content_tv = Adw.ToolbarView()
         self.content_hb = Adw.HeaderBar()
-        self.content_hb.add_css_class("lscc-tall")
         self.content_tv.add_top_bar(self.content_hb)
         pv = Gtk.Box(spacing=8, tooltip_text=_("Tryb podglądu: aplikacja pokazuje polecenia, ale niczego nie zmienia"))
         pv.append(Gtk.Label(label=_("Podgląd")))

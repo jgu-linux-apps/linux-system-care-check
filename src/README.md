@@ -51,7 +51,7 @@ running them.
 ## Install
 
 ```bash
-sudo apt install ./linux-system-care-check_0.4.7_all.deb
+sudo apt install ./linux-system-care-check_0.4.8_all.deb
 ```
 
 Recommended: `udisks2` (drive health), `power-profiles-daemon`, `gnome-shell-extension-appindicator` (tray
@@ -66,6 +66,8 @@ python3 -m unittest discover -s tests -v
 
 ## Version history
 
+- **0.4.8** (2026-11-16): normal-height title bars with a glass sheen; the app's name and menu sit fixed in
+  the sidebar's bottom-left corner; more space between sidebar items and sections.
 - **0.4.7** (2026-11-16): the app's logo and name sit in the sidebar's title bar, larger; both title bars
   are taller and level.
 - **0.4.6** (2026-11-16): history entries (Overview "Recently" and History) follow the chosen language,
