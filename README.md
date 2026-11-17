@@ -51,7 +51,7 @@ running them.
 ## Install
 
 ```bash
-sudo apt install ./linux-system-care-check_0.4.9_all.deb
+sudo apt install ./linux-system-care-check_0.4.10_all.deb
 ```
 
 Recommended: `udisks2` (drive health), `power-profiles-daemon`, `gnome-shell-extension-appindicator` (tray
@@ -66,6 +66,7 @@ python3 -m unittest discover -s tests -v
 
 ## Version history
 
+- **0.4.10** (2026-11-17): Hologram light: the menu in the sidebar's corner has readable dark text.
 - **0.4.9** (2026-11-16): the tray icon no longer disappears after changing the language (the background
   process restarts in place); it also re-registers by itself if the tray host loses it.
 - **0.4.8** (2026-11-16): normal-height title bars with a glass sheen; the app's name and menu sit fixed in

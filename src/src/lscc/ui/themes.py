@@ -147,6 +147,9 @@ headerbar .title, headerbar label, headerbar image { color: #9ff3ff; }
   background-image: linear-gradient(180deg, alpha(#22d3ee, 0.10), alpha(#22d3ee, 0.0) 35%, alpha(#0284c7, 0.08));
   box-shadow: inset -2px 0 alpha(#22d3ee, 0.6); }
 .sidebar-pane, .sidebar-pane label, .sidebar-pane image { color: #d6fbff; }
+/* menus opened from the dark sidebar are light popovers: give them dark text again */
+.sidebar-pane popover label, .sidebar-pane popover image { color: #04293a; }
+.sidebar-pane popover .accelerator, .sidebar-pane popover .dim-label { color: alpha(#04293a, 0.55); }
 .sidebar-pane .dim-label, .sidebar-pane .lscc-kicker { color: #22d3ee; }
 .lscc-foot { border-top: 1px solid alpha(#22d3ee, 0.35); }
 .navigation-sidebar > row:selected { box-shadow: 0 0 18px alpha(#22d3ee, 0.6); }
